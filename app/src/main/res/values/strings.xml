@@ -1,0 +1,317 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">WasteConnect</string>
+    <string name="slogan">"Don't Bin It – Turn Waste to Value"</string>
+    <string name="i_have_waste">I HAVE WASTE</string>
+    <string name="donate_description">Donate for collection</string>
+    <string name="become_collector">BECOME A COLLECTOR</string>
+    <string name="collector_description">Earn by collecting</string>
+    <string name="login_text">Already have an account? Log in</string>
+    <string name="arrow_right">></string>
+    <string name="waste_food">📦</string>
+    <string name="bike">🚴</string>
+
+    <!-- Screen 3A - Collector Registration -->
+    <string name="collector_registration">🚴 COLLECTOR REGISTRATION</string>
+    <string name="full_name">Full Name</string>
+    <string name="full_name_hint">John Doe</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="phone_hint">+256 712 345 678</string>
+    <string name="email">Email (Optional)</string>
+    <string name="email_hint">john@email.com</string>
+    <string name="vehicle_type">Vehicle Type</string>
+    <string name="select_vehicle">Select Vehicle</string>
+    <string name="bicycle">Bicycle</string>
+    <string name="motorcycle">Motorcycle</string>
+    <string name="car">Car</string>
+    <string name="truck">Truck</string>
+    <string name="upload_id">Upload ID Document</string>
+    <string name="upload_front">+ Upload ID Front</string>
+    <string name="upload_back">+ Upload ID Back</string>
+    <string name="terms_text">I agree to the Terms and Conditions</string>
+    <string name="submit_for_approval">SUBMIT FOR APPROVAL</string>
+    <string name="already_have_account">Already have an account? Login</string>
+
+    <!-- Content Descriptions -->
+    <string name="desc_back">Navigate back</string>
+    <string name="desc_upload_front">Upload front of ID</string>
+    <string name="desc_upload_back">Upload back of ID</string>
+    <string name="desc_terms">Agree to terms and conditions</string>
+
+    <!-- Content Descriptions for Accessibility -->
+    <string name="desc_logo">App logo - WasteConnect</string>
+
+
+    <string-array name="vehicle_types">
+        <item>Select Vehicle</item>
+        <item>Bicycle</item>
+        <item>Motorcycle</item>
+        <item>Car</item>
+        <item>Truck</item>
+    </string-array>
+
+    <!-- Upload button states -->
+    <string name="id_front_upload">+ Upload ID Front</string>
+    <string name="id_back_upload">+ Upload ID Back</string>
+    <string name="id_front_uploaded">✓ ID Front Uploaded</string>
+    <string name="id_back_uploaded">✓ ID Back Uploaded</string>
+    <string name="front_upload_demo">Front ID selected (demo)</string>
+    <string name="back_upload_demo">Back ID selected (demo)</string>
+
+
+    <!-- Screen 3B - Approval Pending -->
+    <string name="pending">PENDING</string>
+    <string name="application_submitted">Your application has been submitted successfully!</string>
+    <string name="application_details">APPLICATION DETAILS</string>
+    <string name="name_label">Name:</string>
+    <string name="phone_label">Phone:</string>
+    <string name="status_label">Status:</string>
+    <string name="pending_review">Pending Review</string>
+    <string name="direct_call_message">You will receive a direct call on your phone</string>
+    <string name="back_to_home">BACK TO HOME</string>
+
+    <string name="approval_name">John Doe</string>
+    <string name="approval_phone">+256 754160893</string>
+
+    <!-- Screen 3C - Collector Login -->
+    <string name="collector_login">Collector Login</string>
+    <string name="phone_hint_login">Phone number</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button">LOGIN</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="no_account">Don\'t have an account? Register here</string>
+    <string name="login_error_empty">Please enter phone and password</string>
+    <string name="login_error_invalid">Invalid phone or password</string>
+    <string name="login_success">Login successful!</string>
+
+    <!-- Content Descriptions -->
+    <string name="desc_phone_icon">Phone icon</string>
+    <string name="desc_password_icon">Password icon</string>
+    <string name="desc_eye_icon">Show password</string>
+
+    <!-- Screen 3D - Collector Dashboard -->
+    <string name="welcome_back">Welcome back,</string>
+    <string name="online">ONLINE</string>
+    <string name="offline">OFFLINE</string>
+    <string name="today_summary">TODAY\'S SUMMARY</string>
+    <string name="jobs_completed">Jobs Completed:</string>
+    <string name="earnings_today">Earnings Today:</string>
+    <string name="rating">Rating:</string>
+    <string name="available_jobs">AVAILABLE JOBS NEARBY</string>
+    <string name="posted_ago">Posted %d min ago</string>
+    <string name="view_button">VIEW</string>
+    <string name="my_active_collections">MY ACTIVE COLLECTIONS</string>
+    <string name="in_progress">%d in progress</string>
+    <string name="no_jobs">No jobs available nearby</string>
+
+    <!-- Dashboard additional strings -->
+    <string name="offline_message">You are offline. Go online to see available jobs.</string>
+    <string name="viewing_job">Viewing %s job</string>
+    <string name="active_collections_coming">Active Collections - Coming Soon</string>
+    <string name="home_tab">Home</string>
+    <string name="jobs_tab_coming">Jobs - Coming Soon</string>
+    <string name="earnings_tab_coming">Earnings - Coming Soon</string>
+    <string name="profile_tab_coming">Profile - Coming Soon</string>
+    <!-- Login messages -->
+    <string name="account_pending">Your account is still pending approval. You will receive a call when approved.</string>
+
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_jobs">Jobs</string>
+    <string name="nav_earnings">Earnings</string>
+    <string name="nav_profile">Profile</string>
+    <string name="mixed_food">Mixed Food</string>
+    <string name="_0_8_km_2_5_kg">0.8 km • 2.5 kg</string>
+    <string name="posted_5_min_ago">Posted 5 min ago</string>
+    <string name="food_icon">🍚</string>
+    <string name="notification_bell">🔔</string>
+    <string name="john">John</string>
+    <string name="_2">2</string>
+    <string name="ugx_30000">UGX 30000</string>
+    <string name="_rating">4.8</string>
+    <string name="collections">2 in progress</string>
+    <string name="home_icon">🏠</string>
+    <string name="jobs_icon">📋</string>
+    <string name="earnings_icon">💰</string>
+    <string name="profile_icon">👤</string>
+
+    <!-- Screen 3E - Job Details -->
+    <string name="job_details">Job Details</string>
+    <string name="quantity">Quantity:</string>
+    <string name="distance">Distance:</string>
+    <string name="posted">Posted:</string>
+    <string name="donor">Donor:</string>
+
+    <string name="pickup_location">PICKUP LOCATION</string>
+    <string name="instructions">Instructions:</string>
+    <string name="waste_photos">WASTE PHOTOS</string>
+    <string name="accept_job">ACCEPT JOB</string>
+    <string name="decline_job">DECLINE</string>
+    <string name="job_accepted">Job accepted! Redirecting to active job…</string>
+    <string name="job_declined">Job declined</string>
+    <string name="no_instructions">No special instructions</string>
+    <string name="no_photos">No photos provided</string>
+    <string name="back">Back</string>
+    <string name="quantity_2_5_kg">📦 Quantity: 2.5 kg</string>
+    <string name="distance_0_8_km">📍 Distance: 0.8 km</string>
+    <string name="posted_5_min_ago_icon">⏱️ Posted: 5 min ago</string>
+    <string name="donor_sarah_4_9">👤 Donor: Sarah (⭐4.9)</string>
+    <string name="_123_main_street_apt_4b">123 Main Street, Apt 4B</string>
+    <string name="kampala_uganda">Kampala, Uganda</string>
+    <string name="ring_doorbell_back_door">Ring doorbell, back door</string>
+    <string name="camera">📷</string>
+
+    <!-- Screen 3F - Active Job -->
+    <string name="active_job_badge">ACTIVE JOB</string>
+    <string name="food_type_label">Food Type:</string>
+    <string name="quantity_label">Quantity:</string>
+    <string name="donor_name_label">Donor:</string>
+    <string name="donor_phone_label">Phone:</string>
+    <string name="pickup_address">PICKUP ADDRESS</string>
+    <string name="donor_contact">DONOR CONTACT</string>
+    <string name="get_directions">GET DIRECTIONS</string>
+    <string name="call_donor">CALL DONOR</string>
+    <string name="mark_collected">MARK AS COLLECTED</string>
+    <string name="collection_confirmed">Collection confirmed! Thank you for your service.</string>
+    <string name="directions_open">Opening Google Maps…</string>
+    <string name="_256_712_345_678">📞 +256 712 345 678</string>
+
+    <!-- Screen 3G - Jobs Screen -->
+    <string name="jobs_title">My Jobs</string>
+    <string name="tab_available">Available</string>
+    <string name="tab_completed">Completed</string>
+    <string name="no_available_jobs">No available jobs nearby</string>
+    <string name="no_completed_jobs">No completed jobs yet</string>
+    <string name="job_completed_on">Completed on</string>
+    <string name="earned_amount">Earned: KES %s</string>
+    <string name="view_details">View Details</string>
+    <string name="_2_5_kg">📦 2.5 kg</string>
+    <string name="completed_on_25_feb_2026">📅 Completed on 25 Feb 2026</string>
+    <string name="earned_ugx_3000">💰 Earned: UGX 3000</string>
+    <string name="completed">Completed</string>
+
+    <!-- Content Descriptions -->
+    <string name="jobs_list_description">List of jobs. Swipe up and down to browse.</string>
+
+    <!-- Screen 3H - Earnings Screen -->
+    <string name="earnings_title">My Earnings</string>
+    <string name="total_earnings">Total Earnings</string>
+    <string name="total_kg">Total kg Collected</string>
+    <string name="enter_kg">Enter kg collected</string>
+    <string name="kg_hint">e.g., 5.5</string>
+    <string name="calculate">CALCULATE EARNINGS</string>
+    <string name="estimated_earnings">Estimated Earnings: KES %s</string>
+    <string name="rate_per_kg">Rate: UGX 160 per kg</string>
+    <string name="recent_collections">Recent Collections</string>
+    <string name="no_recent">No recent collections</string>
+    <string name="kg_unit">kg</string>
+    <string name="collected_on">Collected on</string>
+    <string name="_15_3_kg">15.3 kg</string>
+    <string name="_25_feb_2026">25 Feb 2026</string>
+
+    <!-- Screen 4A - Profile Screen -->
+    <string name="profile_title">My Profile</string>
+    <string name="member_since">Member since</string>
+    <string name="total_jobs">Total Jobs</string>
+    <string name="total_collected">Total Collected</string>
+    <string name="settings">Settings</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="notifications">Notifications</string>
+    <string name="language">Language</string>
+    <string name="help_support">Help &amp; Support</string>
+    <string name="terms_conditions">Terms &amp; Conditions</string>
+    <string name="logout">Logout</string>
+    <string name="logout_confirmation">Are you sure you want to logout?</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes_logout">Yes, Logout</string>
+    <string name="logout_success">Logged out successfully</string>
+    <string name="profile_content">Profile content</string>
+    <string name="member_since_jan_2026">📅 Member since Jan 2026</string>
+    <string name="_24">24</string>
+    <string name="weight">⚖️</string>
+    <string name="_156">156</string>
+    <string name="money_bag">💰</string>
+
+    <!-- Screen 2A - Waste Type Selection -->
+    <string name="waste_type_question">What type of food waste</string>
+    <string name="waste_type_question_2">do you have?</string>
+    <string name="cooked_food">Cooked Food</string>
+    <string name="cooked_food_desc">Leftovers, prepared meals</string>
+    <string name="vegetables">Raw Vegetables/Fruits</string>
+    <string name="vegetables_desc">Peels, spoilt produce</string>
+    <string name="bakery">Bakery/Starchy</string>
+    <string name="bakery_desc">Bread, rice, pasta</string>
+    <string name="meat_dairy">Meat/Dairy</string>
+    <string name="meat_dairy_desc">Requires special handling</string>
+    <string name="mixed_other">Mixed/Other</string>
+    <string name="mixed_other_desc">Specify in notes</string>
+    <string name="selected_items">Selected: %d item</string>
+    <string name="selected_items_plural">Selected: %d items</string>
+    <string name="continue_button">CONTINUE →</string>
+    <string name="step_1_of_4">Step 1 of 4</string>
+    <string name="waste_type_selection_list">Waste type selection list</string>
+    <string name="selected_0_items">Selected: 0 items</string>
+    <string name="icon_">🍚</string>
+    <string name="tick">✓</string>
+
+    <!-- Screen 2B - Quantity & Details -->
+    <string name="step_2_of_4">Step 2 of 4</string>
+    <string name="how_much">How much do you have?</string>
+    <string name="or_enter_manually">OR enter manually:</string>
+    <string name="add_photos">Add Photos (Optional)</string>
+    <string name="photo_hint">Tap to add photo</string>
+    <string name="additional_notes">Additional Notes</string>
+    <string name="notes_hint">e.g., Food is in black bags at the back door…</string>
+    <string name="pickup_time">Pickup Time</string>
+    <string name="asap">As soon as possible</string>
+    <string name="schedule_later">Schedule for later</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="today">Today</string>
+    <string name="photo_added">Photo added</string>
+    <string name="photo_removed">Photo removed</string>
+    <string name="quantity_details_form">Quantity details form</string>
+    <string name="_2_5">2.5</string>
+    <string name="plus">+</string>
+    <string name="_2_30_pm">2:30 PM</string>
+
+    <!-- Screen 2C - Location Confirmation -->
+    <string name="step_3_of_4">Step 3 of 4</string>
+    <string name="where_pickup">Where should we pick up from?</string>
+    <string name="or_enter_address">OR enter address manually:</string>
+    <string name="address_line1">Street address</string>
+    <string name="address_line1_hint">123 Main Street</string>
+    <string name="address_line2">Apt, suite, etc. (optional)</string>
+    <string name="address_line2_hint">Apt 4B</string>
+    <string name="city">City</string>
+    <string name="city_hint">Kampala</string>
+    <string name="state">State/Province</string>
+    <string name="state_hint">Central</string>
+    <string name="zip">ZIP/Postal code</string>
+    <string name="zip_hint">12345</string>
+    <string name="pickup_instructions">Specific pickup instructions</string>
+    <string name="instructions_hint">e.g., Ring doorbell, leave at back gate</string>
+    <string name="save_address">Save this address for future use</string>
+    <string name="address_saved">Address saved as</string>
+    <string name="use_current_location">Use current location</string>
+    <string name="location_permission_denied">Location permission denied</string>
+    <string name="location_details_form">Location details form</string>
+    <string name="map">🗺️</string>
+
+    <!-- Screen 2D - Confirmation -->
+    <string name="step_4_of_4">Step 4 of 4</string>
+    <string name="waste_posted">WASTE POSTED!</string>
+    <string name="searching">SEARCHING</string>
+    <string name="searching_message">Looking for nearest collector…</string>
+    <string name="collector_found">COLLECTOR FOUND!</string>
+    <string name="found">FOUND</string>
+    <string name="collector_will_collect">%s will collect your food waste</string>
+    <string name="arriving_in">Arriving in %d minutes</string>
+    <string name="cancel_post">CANCEL POST</string>
+    <string name="ok_got_it">OK, GOT IT</string>
+    <string name="cancel_confirm">Are you sure you want to cancel this post?</string>
+    <string name="post_cancelled">Post cancelled</string>
+    <string name="call">Call</string>
+    <string name="chat">Chat</string>
+    <string name="keep_your_phone_nearby">💡 Keep your phone nearby</string>
+    <string name="search">🔍</string>
+</resources>

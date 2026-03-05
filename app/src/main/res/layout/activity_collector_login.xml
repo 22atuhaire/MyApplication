@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/tvHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/collector_login"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/green_primary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="32dp" />
+
+    <!-- Login Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@color/white"
+        app:strokeColor="@color/green_primary"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Phone Number Field -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="@string/phone_number"
+                android:textColor="@color/gray_dark"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/etPhone"
+                android:layout_width="272dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@color/gray_light"
+                android:textColorHint="@color/hint_text"
+                android:hint="@string/phone_hint_login"
+                android:importantForAutofill="no"
+                android:inputType="phone"
+                android:padding="16dp"
+                android:textSize="16sp" />
+
+            <!-- Password Field -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="@string/password_hint"
+                android:textColor="@color/gray_dark"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="272dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@color/gray_light"
+                android:textColorHint="@color/hint_text"
+                android:hint="@string/password_hint"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:padding="16dp"
+                android:importantForAccessibility="no"
+                android:textSize="16sp" />
+
+            <!-- Forgot Password Link -->
+
+            <!-- Login Button -->
+
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="209dp"
+                android:layout_height="48dp"
+
+                android:layout_marginBottom="24dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="48dp"
+                android:text="@string/forgot_password"
+                android:textColor="@color/green_primary"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/green_primary"
+                android:enabled="false"
+                android:text="@string/login_button"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Register Link -->
+    <TextView
+        android:id="@+id/tvRegisterLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_account"
+        android:textSize="14sp"
+        android:textColor="@color/gray_dark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="32dp"
+        android:minHeight="48dp"
+        android:gravity="center"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
