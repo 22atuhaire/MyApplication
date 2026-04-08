@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
     android:padding="16dp">
 
-    <!-- Top Bar with Online/Offline Toggle -->
     <LinearLayout
         android:id="@+id/llTopBar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/tvOnlineStatus"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="@string/online"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
+            android:layout_marginEnd="8dp"
             android:background="@color/green_primary"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:paddingHorizontal="20dp"
             android:paddingVertical="8dp"
-            android:layout_marginEnd="8dp"
-            android:foreground="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true" />
+            android:text="@string/online"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <View
             android:layout_width="0dp"
@@ -42,64 +42,65 @@
             android:id="@+id/tvNotifications"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="@string/notification_bell"
-            android:textSize="20sp"
-            android:gravity="center"
-            android:foreground="?attr/selectableItemBackground"
-            android:textColor="@color/gold_accent"
             android:clickable="true"
-            android:focusable="true" />
+            android:contentDescription="@string/notification_bell"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:text="@string/notification_bell"
+            android:textColor="@color/gold_accent"
+            android:textSize="20sp" />
     </LinearLayout>
 
-    <!-- Welcome Message -->
     <TextView
         android:id="@+id/tvWelcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="@string/welcome_back"
-        android:textSize="18sp"
         android:textColor="@color/gray_dark"
-        app:layout_constraintTop_toBottomOf="@+id/llTopBar"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp" />
+        app:layout_constraintTop_toBottomOf="@id/llTopBar" />
 
     <TextView
         android:id="@+id/tvCollectorName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="@string/john"
+        android:textColor="@color/black"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@+id/tvWelcome"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="4dp" />
+        app:layout_constraintTop_toBottomOf="@id/tvWelcome" />
 
-    <!-- Today's Summary Card -->
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardSummary"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:cardBackgroundColor="@color/light_green_bg"
         app:cardCornerRadius="16dp"
         app:cardElevation="2dp"
-        app:cardBackgroundColor="@color/light_green_bg"
-        app:layout_constraintTop_toBottomOf="@+id/tvCollectorName"
-        android:layout_marginTop="20dp"
-        android:padding="16dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvCollectorName">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:text="@string/today_summary"
-                android:textSize="14sp"
-                android:textStyle="bold"
                 android:textColor="@color/gray_dark"
-                android:layout_marginBottom="12dp" />
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -112,102 +113,102 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/tvJobsCompleted"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/_2"
+                        android:textColor="@color/green_primary"
                         android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/green_primary" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="@string/jobs_completed"
-                        android:textSize="12sp"
                         android:textColor="@color/gray_dark"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/tvEarningsToday"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/ugx_30000"
+                        android:textColor="@color/green_primary"
                         android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/green_primary" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="@string/earnings_today"
-                        android:textSize="12sp"
                         android:textColor="@color/gray_dark"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/tvRating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/_rating"
+                        android:textColor="@color/green_primary"
                         android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/green_primary" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="@string/rating"
-                        android:textSize="12sp"
                         android:textColor="@color/gray_dark"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <!-- Available Jobs Header -->
     <TextView
         android:id="@+id/tvAvailableJobsHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:text="@string/available_jobs"
+        android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@+id/cardSummary"
-        android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardSummary" />
 
-    <!-- Jobs List Container (ScrollView) -->
     <ScrollView
         android:id="@+id/scrollJobs"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvAvailableJobsHeader"
-        app:layout_constraintBottom_toTopOf="@+id/llActiveCollections"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp">
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvAvailableJobsHeader">
 
         <LinearLayout
             android:id="@+id/llJobsContainer"
@@ -215,91 +216,49 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Jobs will be added here dynamically -->
-            <!-- For now, include a sample job card -->
             <include layout="@layout/item_job_card" />
-
         </LinearLayout>
     </ScrollView>
 
-    <!-- Active Collections Link -->
-    <LinearLayout
-        android:id="@+id/llActiveCollections"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="16dp"
-        android:background="@color/gray_light"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
-        android:foreground="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/my_active_collections"
-            android:textSize="16sp"
-            android:textColor="@color/black" />
-
-        <TextView
-            android:id="@+id/tvActiveCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/collections"
-            android:textSize="14sp"
-            android:textColor="@color/green_primary"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/arrow_right"
-            android:textSize="18sp"
-            android:textColor="@color/green_primary" />
-    </LinearLayout>
-
-    <!-- Bottom Navigation -->
     <LinearLayout
         android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:minHeight="60dp"
         android:baselineAligned="false"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:weightSum="4"
         android:background="@color/white"
         android:elevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:gravity="center_vertical"
+        android:minHeight="60dp"
+        android:orientation="horizontal"
+        android:weightSum="4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:id="@+id/navHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/home_icon"
-                android:textSize="20sp"
-                android:textColor="@color/green_primary" />
+                android:textColor="@color/green_primary"
+                android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/nav_home"
-                android:textSize="12sp"
-                android:textColor="@color/green_primary" />
+                android:textColor="@color/green_primary"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -307,25 +266,25 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/jobs_icon"
-                android:textSize="20sp"
-                android:textColor="@color/gray_dark" />
+                android:textColor="@color/gray_dark"
+                android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/nav_jobs"
-                android:textSize="12sp"
-                android:textColor="@color/gray_dark" />
+                android:textColor="@color/gray_dark"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -333,25 +292,25 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/earnings_icon"
-                android:textSize="20sp"
-                android:textColor="@color/gray_dark" />
+                android:textColor="@color/gray_dark"
+                android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/nav_earnings"
-                android:textSize="12sp"
-                android:textColor="@color/gray_dark" />
+                android:textColor="@color/gray_dark"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -359,25 +318,25 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/profile_icon"
-                android:textSize="20sp"
-                android:textColor="@color/gray_dark" />
+                android:textColor="@color/gray_dark"
+                android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/nav_profile"
-                android:textSize="12sp"
-                android:textColor="@color/gray_dark" />
+                android:textColor="@color/gray_dark"
+                android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
 

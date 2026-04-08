@@ -101,11 +101,10 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal">
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/or_enter_address"
                         android:textSize="14sp"
@@ -114,7 +113,7 @@
 
                     <!-- Street Address Label -->
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/address_line1"
                         android:textSize="12sp"
@@ -124,8 +123,8 @@
                     <!-- EditText with proper width constraints -->
                     <EditText
                         android:id="@+id/etAddress"
-                        android:layout_width="300dp"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
                         android:layout_marginBottom="4dp"
                         android:hint="@string/address_line1_hint"
                         android:inputType="textPostalAddress"
@@ -133,7 +132,8 @@
                         android:padding="16dp"
                         android:autofillHints="address"
                         android:importantForAutofill="yes"
-                        android:maxWidth="400dp" />
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/hint_text" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
             <!-- Instructions Card -->
@@ -164,10 +164,8 @@
 
                     <EditText
                         android:id="@+id/etInstructions"
-                        android:layout_width="300dp"
-                        android:layout_height="wrap_content"
-                        android:minHeight="100dp"
-                        android:lines="4"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
                         android:hint="@string/instructions_hint"
                         android:textSize="14sp"
                         android:background="@color/gray_light"
@@ -175,7 +173,9 @@
                         android:padding="16dp"
                         android:inputType="textMultiLine"
                         android:autofillHints="no"
-                        android:importantForAutofill="no" />
+                        android:importantForAutofill="no"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/hint_text" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -200,17 +200,19 @@
     <!-- Continue Button -->
     <Button
         android:id="@+id/btnContinue"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="56dp"
         android:text="@string/continue_button"
         android:textSize="16sp"
         android:textStyle="bold"
         android:backgroundTint="@color/green_primary"
         app:cornerRadius="24dp"
-        android:paddingHorizontal="40dp"
+        android:paddingHorizontal="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="24dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

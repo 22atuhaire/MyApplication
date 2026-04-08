@@ -6,11 +6,18 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
-//import com.example.myapplication.R.string.account_pending
+import com.example.myapplication.api.RetrofitClient
+import com.example.myapplication.models.CollectorLoginRequest
+import kotlinx.coroutines.*
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class CollectorLoginActivity : AppCompatActivity() {
 
@@ -19,14 +26,18 @@ class CollectorLoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
     private lateinit var tvForgotPassword: TextView
     private lateinit var tvRegisterLink: TextView
+    private lateinit var progressBar: ProgressBar
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_collector_login)
 
         initViews()
+        prefillPhoneFromIntent()
         setupTextWatchers()
         setupClickListeners()
+        checkApprovalStatusOnAppStart()
     }
 
     private fun initViews() {
@@ -35,6 +46,15 @@ class CollectorLoginActivity : AppCompatActivity() {
         btnLogin = findViewById(R.id.btnLogin)
         tvForgotPassword = findViewById(R.id.tvForgotPassword)
         tvRegisterLink = findViewById(R.id.tvRegisterLink)
+        progressBar = findViewById(R.id.progressBar)
+    }
+
+    private fun prefillPhoneFromIntent() {
+        val prefilledPhone = intent.getStringExtra("phone")?.trim().orEmpty()
+        if (prefilledPhone.isNotEmpty()) {
+            etPhone.setText(prefilledPhone)
+            etPhone.setSelection(prefilledPhone.length)
+        }
     }
 
     private fun setupTextWatchers() {
@@ -76,6 +96,38 @@ class CollectorLoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkApprovalStatusOnAppStart() {
+        val phone = etPhone.text.toString().trim()
+
+        if (phone.isNotBlank()) {
+            coroutineScope.launch {
+                try {
+                    val response = withContext(Dispatchers.IO) {
+                        RetrofitClient.apiService.checkCollectorStatus(phone).execute()
+                    }
+
+                    if (response.isSuccessful) {
+                        val result = response.body()
+                        if (result != null && result.success) {
+                            val status = result.status?.lowercase()
+
+                            if (status == "approved") {
+                                Toast.makeText(
+                                    this@CollectorLoginActivity,
+                                    "Your account has been approved!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                Log.d("ApprovalCheck", "Collector $phone is approved")
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("ApprovalCheck", "Error checking approval status: ${e::class.simpleName}: ${e.message}")
+                }
+            }
+        }
+    }
+
     private fun attemptLogin() {
         val phone = etPhone.text.toString().trim()
         val password = etPassword.text.toString().trim()
@@ -83,31 +135,152 @@ class CollectorLoginActivity : AppCompatActivity() {
         Log.d("LoginAttempt", "Phone: $phone")
 
         if (phone.isNotBlank() && password.isNotBlank()) {
-            // FOR DEVELOPMENT: Skip approval check, go directly to dashboard
-            Toast.makeText(this, "Login successful! Welcome to dashboard", Toast.LENGTH_SHORT).show()
-
-            // Navigate to Collector Dashboard
-            val intent = Intent(this, CollectorDashboardActivity::class.java)
-            intent.putExtra("collector_name", "John") // You can pass the name if you have it
-            startActivity(intent)
-            finish()
-
+            performLogin(phone, password)
         } else {
             Toast.makeText(this, "Please enter phone and password", Toast.LENGTH_SHORT).show()
         }
     }
-    private fun checkIfCollectorIsApproved(phone: String): Boolean {
-        // SIMULATION - In real app, this would check a database
 
-        // For demo purposes:
-        // - Phone numbers containing "123" are approved (like +256 712 345 678)
-        // - Others are still pending
+    private fun performLogin(phone: String, password: String) {
+        // Show loading
+        progressBar.visibility = View.VISIBLE
+        btnLogin.isEnabled = false
 
-        val approved = phone.contains("123")  // Just for demo!
+        coroutineScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.apiService
+                        .collectorLogin(CollectorLoginRequest(phone, password))
+                        .execute()
+                }
 
-        Log.d("LoginAttempt", "Phone: $phone - Approved: $approved")
+                // Hide loading
+                progressBar.visibility = View.GONE
+                btnLogin.isEnabled = true
 
-        return approved
+                if (response.isSuccessful) {
+                    val result = response.body()
+                    Log.d("LoginSuccess", "Response: $result")
+
+                    if (result?.isSuccessfulLogin == true) {
+                        // Prefer collector status from user object when available.
+                        val resolvedStatus = result.user?.status?.lowercase() ?: result.status?.lowercase()
+
+                        val prefs = getSharedPreferences("collector_prefs", MODE_PRIVATE)
+                        prefs.edit()
+                            .putString("collector_token", result.token)
+                            .putString("collector_name", result.user?.name ?: "Collector")
+                            .putString("collector_phone", phone)
+                            .putString("collector_status", resolvedStatus)
+                            .apply()
+
+                        Toast.makeText(
+                            this@CollectorLoginActivity,
+                            "Login successful! Welcome ${result.user?.name ?: ""}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        val intent = Intent(this@CollectorLoginActivity, CollectorDashboardActivity::class.java)
+                        intent.putExtra("collector_name", result.user?.name ?: "Collector")
+                        intent.putExtra("collector_phone", phone)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        finish()
+                        return@launch
+                    }
+
+                    // Login not successful: use status/message for user feedback.
+                    when (result?.status?.lowercase()) {
+                        "pending" -> {
+                            Toast.makeText(
+                                this@CollectorLoginActivity,
+                                "Your account is pending admin approval. Please wait.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        "rejected" -> {
+                            Toast.makeText(
+                                this@CollectorLoginActivity,
+                                "Your account has been rejected. Please contact admin.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        "wrong_password" -> {
+                            Toast.makeText(
+                                this@CollectorLoginActivity,
+                                "Incorrect password. Please try again.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else -> {
+                            Toast.makeText(
+                                this@CollectorLoginActivity,
+                                result?.message ?: "Login failed. Invalid credentials.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } else {
+                    val errorCode = response.code()
+                    val errorBody = response.errorBody()?.string() ?: "No error details"
+                    Log.e("LoginError", "HTTP $errorCode: $errorBody")
+
+                    // Try to parse error response if it's 422 validation error
+                    if (errorCode == 422) {
+                        Toast.makeText(
+                            this@CollectorLoginActivity,
+                            "Invalid phone or password format",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        val msg = when (errorCode) {
+                            401 -> "Incorrect phone or password."
+                            403 -> "Access denied. Your account may not be approved."
+                            404 -> "Account not found. Please register first."
+                            500 -> "Server error. Please try again later."
+                            else -> "Login failed (Error $errorCode). Please try again."
+                        }
+                        Toast.makeText(this@CollectorLoginActivity, msg, Toast.LENGTH_LONG).show()
+                    }
+                }
+            } catch (e: UnknownHostException) {
+                progressBar.visibility = View.GONE
+                btnLogin.isEnabled = true
+                Log.e("LoginError", "UnknownHostException: ${e.message}")
+                Toast.makeText(this@CollectorLoginActivity,
+                    "Cannot reach server. Check your internet connection.", Toast.LENGTH_LONG).show()
+            } catch (e: ConnectException) {
+                progressBar.visibility = View.GONE
+                btnLogin.isEnabled = true
+                Log.e("LoginError", "ConnectException: ${e.message}")
+                Toast.makeText(this@CollectorLoginActivity,
+                    "Connection refused. Make sure the server is running at ${RetrofitClient.BASE_URL}", Toast.LENGTH_LONG).show()
+            } catch (e: SocketTimeoutException) {
+                progressBar.visibility = View.GONE
+                btnLogin.isEnabled = true
+                Log.e("LoginError", "SocketTimeoutException: ${e.message}")
+                Toast.makeText(this@CollectorLoginActivity,
+                    "Connection timed out. Server may be slow or unreachable.", Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                // Hide loading
+                progressBar.visibility = View.GONE
+                btnLogin.isEnabled = true
+                val errMsg = "${e::class.simpleName}: ${e.message ?: "unknown error"}"
+                Log.e("LoginError", "Error: $errMsg")
+                Toast.makeText(this@CollectorLoginActivity,
+                    "Error: $errMsg", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Re-check approval status each time user returns to login screen
+        checkApprovalStatusOnAppStart()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        coroutineScope.cancel()
+    }
 }

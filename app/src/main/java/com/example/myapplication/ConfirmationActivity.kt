@@ -1,9 +1,10 @@
 package com.example.myapplication
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -12,8 +13,22 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
+import com.example.myapplication.api.RetrofitClient
+import com.example.myapplication.models.CollectorInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ConfirmationActivity : AppCompatActivity() {
+
+    private enum class SearchState {
+        SEARCHING, FOUND, NO_MATCH, ERROR
+    }
 
     // Views
     private lateinit var tvProgress: TextView
@@ -48,12 +63,23 @@ class ConfirmationActivity : AppCompatActivity() {
 
     // Data
     private var isCollectorFound = false
-    private val handler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
+    private var searchState = SearchState.SEARCHING
+    private var postId: Int = 0
+    private var collectorPhone: String? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
+    private var pollingJob: Job? = null
+
+    private companion object {
+        const val POLL_INTERVAL_MS = 5000L
+        const val MAX_POLL_ATTEMPTS = 12
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirmation)
+
+        postId = intent.getIntExtra("post_id", 0)
+        Log.d("Confirmation", "Post created with ID: $postId")
 
         initViews()
         loadPostSummary()
@@ -125,19 +151,25 @@ class ConfirmationActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         // Bottom action button (Cancel or OK)
         btnAction.setOnClickListener {
-            if (isCollectorFound) {
-                // OK, GOT IT - Go to next screen or back to dashboard
-                Toast.makeText(this, "Collector confirmed!", Toast.LENGTH_SHORT).show()
-                finish()
-            } else {
-                // Cancel post
-                showCancelDialog()
+            when (searchState) {
+                SearchState.FOUND -> {
+                    Toast.makeText(this, "Collector confirmed!", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+                SearchState.SEARCHING -> showCancelDialog()
+                SearchState.NO_MATCH, SearchState.ERROR -> startSearching()
             }
         }
 
         // Call button
         btnCall.setOnClickListener {
-            Toast.makeText(this, "Calling collector... (demo)", Toast.LENGTH_SHORT).show()
+            val phone = collectorPhone
+            if (phone.isNullOrBlank()) {
+                Toast.makeText(this, "Collector phone not available", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
         }
 
         // Chat button
@@ -147,23 +179,78 @@ class ConfirmationActivity : AppCompatActivity() {
     }
 
     private fun startSearching() {
-        // Show searching state
-        showSearchingState()
-
-        // Simulate search for 5 seconds then find collector
-        searchRunnable = Runnable {
-            findCollector()
+        if (postId <= 0) {
+            showErrorState("Missing post ID. Please repost and try again.")
+            return
         }
-        handler.postDelayed(searchRunnable!!, 5000)
+
+        pollingJob?.cancel()
+        showSearchingState(getString(R.string.searching_message))
+
+        pollingJob = coroutineScope.launch {
+            var attempts = 0
+
+            while (isActive && attempts < MAX_POLL_ATTEMPTS && !isCollectorFound) {
+                attempts++
+                val found = checkCollectorMatchOnce()
+
+                if (found) {
+                    return@launch
+                }
+
+                val remaining = MAX_POLL_ATTEMPTS - attempts
+                if (remaining > 0) {
+                    showSearchingState("Looking for available collector nearby... ($remaining)")
+                    delay(POLL_INTERVAL_MS)
+                }
+            }
+
+            if (!isCollectorFound) {
+                showNoCollectorState()
+            }
+        }
     }
 
-    private fun showSearchingState() {
-        isCollectorFound = false
-        llSearching.visibility = android.view.View.VISIBLE
-        llFound.visibility = android.view.View.GONE
-        llContact.visibility = android.view.View.GONE
+    private suspend fun checkCollectorMatchOnce(): Boolean {
+        return try {
+            val response = withContext(Dispatchers.IO) {
+                RetrofitClient.apiService.checkCollectorMatch(postId).execute()
+            }
 
-        // Change bottom button to Cancel
+            if (!response.isSuccessful) {
+                Log.e("Confirmation", "checkCollectorMatch HTTP ${response.code()}")
+                return false
+            }
+
+            val body = response.body()
+            val collector = body?.data?.collector
+
+            if (collector != null) {
+                showFoundState(collector)
+                true
+            } else {
+                Log.d("Confirmation", "No collector yet for post $postId")
+                false
+            }
+        } catch (e: Exception) {
+            Log.e("Confirmation", "Collector match polling failed", e)
+            showErrorState("Could not check nearby collectors. Tap Retry.")
+            true
+        }
+    }
+
+    private fun showSearchingState(message: String) {
+        isCollectorFound = false
+        searchState = SearchState.SEARCHING
+        collectorPhone = null
+        llSearching.visibility = View.VISIBLE
+        llFound.visibility = View.GONE
+        llContact.visibility = View.GONE
+        tvSearchTitle.text = getString(R.string.searching)
+        tvSearchMessage.text = message
+        progressBar.visibility = View.VISIBLE
+
+        // Bottom action: cancel while searching.
         btnAction.text = getString(R.string.cancel_post)
         btnAction.backgroundTintList = android.content.res.ColorStateList.valueOf(
             "#FFFFFF".toColorInt()
@@ -178,38 +265,70 @@ class ConfirmationActivity : AppCompatActivity() {
         )
     }
 
-    private fun findCollector() {
-        // Simulate finding a collector
+    private fun showFoundState(collector: CollectorInfo) {
         isCollectorFound = true
+        searchState = SearchState.FOUND
+        collectorPhone = collector.phone
 
-        // Sample collector data
-        val collectorName = "John Doe"
-        val etaMinutes = 8
+        val collectorName = collector.name.ifBlank { "Collector" }
+        val etaMinutes = collector.eta_minutes ?: 0
 
-        // Update found views
         tvFoundMessage.text = String.format(
             getString(R.string.collector_will_collect),
             collectorName
         )
         tvEta.text = String.format(getString(R.string.arriving_in), etaMinutes)
 
-        // Show found state
-        llSearching.visibility = android.view.View.GONE
-        llFound.visibility = android.view.View.VISIBLE
-        llContact.visibility = android.view.View.VISIBLE
+        llSearching.visibility = View.GONE
+        llFound.visibility = View.VISIBLE
+        llContact.visibility = View.VISIBLE
 
-        // Change bottom button to OK, GOT IT
         btnAction.text = getString(R.string.ok_got_it)
         btnAction.backgroundTintList = android.content.res.ColorStateList.valueOf(
             "#2E7D32".toColorInt()
         )
         btnAction.setTextColor("#FFFFFF".toColorInt())
 
-        // Fix: Remove stroke
         (btnAction as com.google.android.material.button.MaterialButton).setStrokeColor(null)
 
-        // Show success toast
-        Toast.makeText(this, "Collector found! 🚴", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Collector found nearby", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showNoCollectorState() {
+        searchState = SearchState.NO_MATCH
+        llSearching.visibility = View.VISIBLE
+        llFound.visibility = View.GONE
+        llContact.visibility = View.GONE
+
+        tvSearchTitle.text = getString(R.string.searching)
+        tvSearchMessage.text = getString(R.string.no_collectors_nearby)
+        progressBar.visibility = View.GONE
+
+        btnAction.text = getString(R.string.retry_search)
+        btnAction.backgroundTintList = android.content.res.ColorStateList.valueOf(
+            "#2E7D32".toColorInt()
+        )
+        btnAction.setTextColor("#FFFFFF".toColorInt())
+        (btnAction as com.google.android.material.button.MaterialButton).setStrokeColor(null)
+    }
+
+    private fun showErrorState(message: String) {
+        pollingJob?.cancel()
+        searchState = SearchState.ERROR
+        llSearching.visibility = View.VISIBLE
+        llFound.visibility = View.GONE
+        llContact.visibility = View.GONE
+
+        tvSearchTitle.text = getString(R.string.searching)
+        tvSearchMessage.text = message
+        progressBar.visibility = View.GONE
+
+        btnAction.text = getString(R.string.retry_search)
+        btnAction.backgroundTintList = android.content.res.ColorStateList.valueOf(
+            "#2E7D32".toColorInt()
+        )
+        btnAction.setTextColor("#FFFFFF".toColorInt())
+        (btnAction as com.google.android.material.button.MaterialButton).setStrokeColor(null)
     }
 
     private fun showCancelDialog() {
@@ -217,8 +336,7 @@ class ConfirmationActivity : AppCompatActivity() {
             .setTitle("Cancel Post")
             .setMessage(R.string.cancel_confirm)
             .setPositiveButton("Yes, Cancel") { _, _ ->
-                // Cancel the search
-                handler.removeCallbacks(searchRunnable!!)
+                pollingJob?.cancel()
                 Toast.makeText(this, R.string.post_cancelled, Toast.LENGTH_SHORT).show()
                 finish()
             }
@@ -228,7 +346,7 @@ class ConfirmationActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Remove callbacks to prevent memory leaks
-        searchRunnable?.let { handler.removeCallbacks(it) }
+        pollingJob?.cancel()
+        coroutineScope.cancel()
     }
 }

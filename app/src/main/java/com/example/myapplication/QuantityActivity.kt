@@ -179,7 +179,7 @@ class QuantityActivity : AppCompatActivity() {
     }
 
     private fun proceedToNextScreen() {
-        val quantity = etQuantity.text.toString().trim().toDouble()
+        val quantity = etQuantity.text.toString().trim().toDoubleOrNull() ?: 0.0
         val notes = etNotes.text.toString().trim()
         val pickupTime = if (isScheduled) {
             "$selectedDate at $selectedTime"
@@ -187,15 +187,16 @@ class QuantityActivity : AppCompatActivity() {
             "ASAP"
         }
 
-        // Get selected types from intent
+        // Get selected types from intent (passed from WasteTypeActivity)
         val selectedTypes = intent.getStringArrayExtra("selected_types") ?: arrayOf()
 
-        // Navigate to Location screen
-        val intent = Intent(this, LocationActivity::class.java)
-        intent.putExtra("selected_types", selectedTypes)
-        intent.putExtra("quantity", quantity)
-        intent.putExtra("notes", notes)
-        intent.putExtra("pickup_time", pickupTime)
+        // Navigate to Location screen with all data
+        val intent = Intent(this, LocationActivity::class.java).apply {
+            putExtra("selected_types", selectedTypes)
+            putExtra("quantity", quantity)
+            putExtra("notes", notes)
+            putExtra("pickup_time", pickupTime)
+        }
         startActivity(intent)
     }
     // Extension function to convert dp to pixels

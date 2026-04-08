@@ -1,58 +1,66 @@
 package com.example.myapplication
 
-import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
 import android.util.Log
+import android.os.Bundle
+import android.text.InputType
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.example.myapplication.api.RetrofitClient
+import com.example.myapplication.models.CollectorRegistrationRequest
+import kotlinx.coroutines.*
 
 class CollectorRegistrationActivity : AppCompatActivity() {
 
-    // Declare views
+    // Views
     private lateinit var etFullName: EditText
     private lateinit var etPhone: EditText
     private lateinit var etEmail: EditText
+    private lateinit var etPassword: EditText
+    private lateinit var etConfirmPassword: EditText
+    private lateinit var ivPasswordToggle: ImageView
+    private lateinit var ivConfirmPasswordToggle: ImageView
     private lateinit var spinnerVehicle: Spinner
     private lateinit var btnUploadFront: TextView
     private lateinit var btnUploadBack: TextView
     private lateinit var cbTerms: CheckBox
     private lateinit var btnSubmit: Button
     private lateinit var tvLoginLink: TextView
+    private lateinit var progressBar: ProgressBar
 
     // Track upload status
     private var isFrontUploaded = false
     private var isBackUploaded = false
 
+    // For API calls
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_collector_registration)
 
-        // Initialize views
         initViews()
-
-        // Setup vehicle spinner
         setupSpinner()
-
-        // Setup all click listeners (this already includes upload buttons)
         setupClickListeners()
+        checkFormValidity()
     }
 
     private fun initViews() {
         etFullName = findViewById(R.id.etFullName)
         etPhone = findViewById(R.id.etPhone)
         etEmail = findViewById(R.id.etEmail)
+        etPassword = findViewById(R.id.etPassword)
+        etConfirmPassword = findViewById(R.id.etConfirmPassword)
+        ivPasswordToggle = findViewById(R.id.ivPasswordToggle)
+        ivConfirmPasswordToggle = findViewById(R.id.ivConfirmPasswordToggle)
         spinnerVehicle = findViewById(R.id.spinnerVehicle)
         btnUploadFront = findViewById(R.id.btnUploadFront)
         btnUploadBack = findViewById(R.id.btnUploadBack)
         cbTerms = findViewById(R.id.cbTerms)
         btnSubmit = findViewById(R.id.btnSubmit)
         tvLoginLink = findViewById(R.id.tvLoginLink)
+        progressBar = findViewById(R.id.progressBar)
 
         // Set initial text from resources
         btnUploadFront.text = getString(R.string.id_front_upload)
@@ -60,131 +68,241 @@ class CollectorRegistrationActivity : AppCompatActivity() {
     }
 
     private fun setupSpinner() {
-        // Create adapter for spinner
         ArrayAdapter.createFromResource(
             this,
             R.array.vehicle_types,
-            android.R.layout.simple_spinner_item
+            R.layout.spinner_vehicle_item
         ).also { adapter ->
-            // Specify the layout to use when the list of choices appears
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
+            adapter.setDropDownViewResource(R.layout.spinner_vehicle_dropdown_item)
             spinnerVehicle.adapter = adapter
+        }
+
+        spinnerVehicle.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                checkFormValidity()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                checkFormValidity()
+            }
         }
     }
 
     private fun setupClickListeners() {
-        // Upload Front button
         btnUploadFront.setOnClickListener {
-            // For now, just simulate upload
+            // Simulate upload
             isFrontUploaded = true
             btnUploadFront.text = getString(R.string.id_front_uploaded)
-            btnUploadFront.setTextColor(getColor(R.color.green_primary))
+            btnUploadFront.setTextColor(ContextCompat.getColor(this, R.color.green_primary))
             checkFormValidity()
             Toast.makeText(this, getString(R.string.front_upload_demo), Toast.LENGTH_SHORT).show()
         }
 
-        // Upload Back button
         btnUploadBack.setOnClickListener {
-            // For now, just simulate upload
+            // Simulate upload
             isBackUploaded = true
             btnUploadBack.text = getString(R.string.id_back_uploaded)
-            btnUploadBack.setTextColor(getColor(R.color.green_primary))
+            btnUploadBack.setTextColor(ContextCompat.getColor(this, R.color.green_primary))
             checkFormValidity()
             Toast.makeText(this, getString(R.string.back_upload_demo), Toast.LENGTH_SHORT).show()
         }
 
-        // Checkbox listener
         cbTerms.setOnCheckedChangeListener { _, _ ->
             checkFormValidity()
         }
 
-        // Submit button
         btnSubmit.setOnClickListener {
             submitForm()
         }
 
-        // Login link
         tvLoginLink.setOnClickListener {
-            // Navigate to login screen (we'll create later)
-            Toast.makeText(this, "Navigate to Login", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, CollectorLoginActivity::class.java)
+            startActivity(intent)
         }
 
-        // Text change listeners for required fields
+        // Password visibility toggle
+        ivPasswordToggle.setOnClickListener {
+            togglePasswordVisibility(etPassword, ivPasswordToggle)
+        }
+
+        // Confirm Password visibility toggle
+        ivConfirmPasswordToggle.setOnClickListener {
+            togglePasswordVisibility(etConfirmPassword, ivConfirmPasswordToggle)
+        }
+
         val textWatcher = object : android.text.TextWatcher {
-            override fun afterTextChanged(s: android.text.Editable?) {
-                checkFormValidity()
-            }
+            override fun afterTextChanged(s: android.text.Editable?) { checkFormValidity() }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         }
 
         etFullName.addTextChangedListener(textWatcher)
         etPhone.addTextChangedListener(textWatcher)
+        etPassword.addTextChangedListener(textWatcher)
+        etConfirmPassword.addTextChangedListener(textWatcher)
     }
 
-    private fun checkFormValidity() {
+    private fun isFormValid(): Boolean {
         val name = etFullName.text.toString().trim()
         val phone = etPhone.text.toString().trim()
+        val password = etPassword.text.toString().trim()
+        val confirmPassword = etConfirmPassword.text.toString().trim()
         val isNameValid = name.isNotBlank()
         val isPhoneValid = phone.isNotBlank()
-        val isVehicleValid = spinnerVehicle.selectedItemPosition != 0 // Not "Select Vehicle"
+        val isPasswordValid = password.length >= 6
+        val isPasswordMatch = password == confirmPassword
+        val isVehicleValid = spinnerVehicle.selectedItemPosition != 0
         val isUploadValid = isFrontUploaded && isBackUploaded
         val isTermsChecked = cbTerms.isChecked
 
-        // Log each condition to debug
-        Log.d("FormValidation", "Name: '$name' - Valid: $isNameValid")
-        Log.d("FormValidation", "Phone: '$phone' - Valid: $isPhoneValid")
-        Log.d("FormValidation", "Vehicle Position: ${spinnerVehicle.selectedItemPosition} - Valid: $isVehicleValid")
-        Log.d("FormValidation", "Front Uploaded: $isFrontUploaded, Back Uploaded: $isBackUploaded - Valid: $isUploadValid")
-        Log.d("FormValidation", "Terms Checked: $isTermsChecked")
-
-        btnSubmit.isEnabled = isNameValid && isPhoneValid && isVehicleValid &&
-                isUploadValid && isTermsChecked
-
-        Log.d("FormValidation", "Submit Button Enabled: ${btnSubmit.isEnabled}")
+        return isNameValid && isPhoneValid && isPasswordValid &&
+                isPasswordMatch && isVehicleValid && isUploadValid && isTermsChecked
     }
 
-    /**private fun submitForm() {
-        Log.d("Registration", "submitForm() called")
-
-        // Get all values
-        val name = etFullName.text.toString().trim()
-        val phone = etPhone.text.toString().trim()
-        val email = etEmail.text.toString().trim().ifBlank { "Not provided" }
-        val vehicle = spinnerVehicle.selectedItem.toString()
-
-        // Log the values
-        Log.d("Registration", "Name: $name")
-        Log.d("Registration", "Phone: $phone")
-        Log.d("Registration", "Email: $email")
-        Log.d("Registration", "Vehicle: $vehicle")
-
-        // Navigate to Approval Pending screen
-        val intent = Intent(this, ApprovalPendingActivity::class.java)
-        intent.putExtra("name", name)
-        intent.putExtra("phone", phone)
-        startActivity(intent)
-    }**/
+    private fun checkFormValidity() {
+        btnSubmit.isEnabled = isFormValid()
+    }
 
     private fun submitForm() {
-        // Get all values
+        if (!isFormValid()) {
+            Toast.makeText(this, "Please complete all required fields", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Get values
         val name = etFullName.text.toString().trim()
         val phone = etPhone.text.toString().trim()
-        val email = etEmail.text.toString().trim().ifBlank { "Not provided" }
+        val email = etEmail.text.toString().trim().ifBlank { null }
+        val password = etPassword.text.toString().trim()
+        val confirmPassword = etConfirmPassword.text.toString().trim()
         val vehicle = spinnerVehicle.selectedItem.toString()
 
-        // Log the values
-        Log.d("Registration", "Submitting: $name, $phone, $email, $vehicle")
+        // Validate passwords match
+        if (password != confirmPassword) {
+            Toast.makeText(this, getString(R.string.password_mismatch), Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // FOR DEVELOPMENT: Go directly to Login screen
-        val intent = Intent(this, CollectorLoginActivity::class.java)
-        startActivity(intent)
+        if (password.length < 6) {
+            Toast.makeText(this, getString(R.string.password_too_short), Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // Comment out Approval Pending for now
-        // val intent = Intent(this, ApprovalPendingActivity::class.java)
-        // intent.putExtra("name", name)
-        // intent.putExtra("phone", phone)
-        // startActivity(intent)
+        // Show progress
+        showLoading(true)
+
+        // Create request
+        val request = CollectorRegistrationRequest(
+            name = name,
+            phone = phone,
+            email = email,
+            vehicle_type = vehicle,
+            password = password
+        )
+
+        // Log the request for debugging
+        Log.d("RegistrationRequest", "Name: $name, Phone: $phone, Email: $email, Vehicle: $vehicle")
+
+        // Make API call
+        coroutineScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.apiService.collectorRegister(request).execute()
+                }
+
+                showLoading(false)
+
+                if (response.isSuccessful) {
+                    val result = response.body()
+                    Log.d("RegistrationSuccess", "Response: ${result?.message}")
+                    if (result != null && result.success) {
+                        // Registration successful
+                        Toast.makeText(
+                            this@CollectorRegistrationActivity,
+                            result.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+
+                        // Navigate to Approval Pending screen
+                        val intent = Intent(
+                            this@CollectorRegistrationActivity,
+                            ApprovalPendingActivity::class.java
+                        )
+                        intent.putExtra("name", name)
+                        intent.putExtra("phone", phone)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        // Server returned error
+                        Log.e("RegistrationError", "Server error: ${result?.message}")
+                        Toast.makeText(
+                            this@CollectorRegistrationActivity,
+                            result?.message ?: "Registration failed",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } else {
+                    // HTTP error
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("RegistrationError", "HTTP ${response.code()}: $errorBody")
+
+                    Toast.makeText(
+                        this@CollectorRegistrationActivity,
+                        "Error: ${response.code()} - ${response.message()}\n$errorBody",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } catch (e: Exception) {
+                showLoading(false)
+
+                // Log full error details
+                Log.e("RegistrationError", "Exception", e)
+
+                // Show more specific error message
+                val errorMessage = when (e) {
+                    is android.os.NetworkOnMainThreadException -> "Network call on main thread."
+                    is java.net.ConnectException -> "Cannot connect to server. Check if Laravel is running."
+                    is java.net.SocketTimeoutException -> "Connection timeout. Server not responding."
+                    is java.net.UnknownHostException -> "Network error. Check your internet connection."
+                    is java.io.IOException -> "Network I/O error: ${e.localizedMessage ?: "Unknown"}"
+                    else -> "Unexpected error: ${e.javaClass.simpleName}"
+                }
+
+                Toast.makeText(
+                    this@CollectorRegistrationActivity,
+                    errorMessage,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun showLoading(show: Boolean) {
+        if (show) {
+            progressBar.visibility = android.view.View.VISIBLE
+            btnSubmit.isEnabled = false
+        } else {
+            progressBar.visibility = android.view.View.GONE
+            checkFormValidity()
+        }
+    }
+
+    private fun togglePasswordVisibility(editText: EditText, toggleIcon: ImageView) {
+        val isPasswordVisible = editText.inputType == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        if (isPasswordVisible) {
+            // Hide password
+            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            toggleIcon.setImageResource(android.R.drawable.ic_menu_view)
+        } else {
+            // Show password
+            editText.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            toggleIcon.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+        }
+        editText.setSelection(editText.text.length)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        coroutineScope.cancel()
     }
 }

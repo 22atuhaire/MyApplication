@@ -82,15 +82,17 @@
                         <EditText
                             android:id="@+id/etQuantity"
                             android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginEnd="100dp"
+                            android:layout_height="56dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_weight="1"
                             android:background="@color/gray_light"
                             android:hint="@string/_2_5"
                             android:inputType="numberDecimal"
                             android:autofillHints="quantity"
                             android:importantForAutofill="yes"
-                            android:padding="16dp" />
+                            android:padding="16dp"
+                            android:textColor="@color/black"
+                            android:textColorHint="@color/hint_text" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -170,7 +172,7 @@
 
                     <EditText
                         android:id="@+id/etNotes"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="100dp"
                         android:hint="@string/notes_hint"
                         android:textSize="14sp"
@@ -179,7 +181,9 @@
                         android:padding="16dp"
                         android:autofillHints="notes"
                         android:importantForAutofill="yes"
-                        android:inputType="textMultiLine" />
+                        android:inputType="textMultiLine"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/hint_text" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -273,10 +277,12 @@
     <!-- Continue Button -->
     <Button
         android:id="@+id/btnContinue"
-        android:layout_width="wrap_content"
-        android:paddingHorizontal="40dp"
+        android:layout_width="0dp"
         android:layout_height="56dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:layout_marginBottom="16dp"
+        android:paddingHorizontal="24dp"
         android:text="@string/continue_button"
         android:textSize="16sp"
         android:textStyle="bold"

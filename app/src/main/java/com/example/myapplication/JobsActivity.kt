@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -9,6 +10,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.myapplication.api.RetrofitClient
+import com.example.myapplication.models.AvailableJob
+import com.example.myapplication.models.toAvailableJob
+import kotlinx.coroutines.*
 
 class JobsActivity : AppCompatActivity() {
 
@@ -25,27 +30,53 @@ class JobsActivity : AppCompatActivity() {
 
     // State
     private var currentTab = "available" // "available" or "completed"
+    private lateinit var authToken: String
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_jobs)
+        try {
+            setContentView(R.layout.activity_jobs)
+            Log.d("JobsScreen", "Layout set successfully")
 
-        initViews()
-        setupClickListeners()
-        loadAvailableJobs() // Default tab
+            initViews()
+
+            // Get token from SharedPreferences
+            val prefs = getSharedPreferences("collector_prefs", MODE_PRIVATE)
+            authToken = prefs.getString("collector_token", "") ?: ""
+
+            if (authToken.isEmpty()) {
+                Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, CollectorLoginActivity::class.java))
+                finish()
+                return
+            }
+
+            setupClickListeners()
+            loadAvailableJobs() // Default tab
+        } catch (e: Exception) {
+            Log.e("JobsScreen", "Error in onCreate: ${e.message}", e)
+            Toast.makeText(this, "Jobs Error: ${e.message}", Toast.LENGTH_LONG).show()
+            finish()
+        }
     }
 
     private fun initViews() {
-        // Top Bar
-        tvBack = findViewById(R.id.tvBack)
+        try {
+            // Top Bar
+            tvBack = findViewById(R.id.tvBack) ?: throw Exception("tvBack not found")
 
-        // Tabs
-        tabAvailable = findViewById(R.id.tabAvailable)
-        tabCompleted = findViewById(R.id.tabCompleted)
+            // Tabs
+            tabAvailable = findViewById(R.id.tabAvailable) ?: throw Exception("tabAvailable not found")
+            tabCompleted = findViewById(R.id.tabCompleted) ?: throw Exception("tabCompleted not found")
 
-        // Jobs Container
-        scrollJobs = findViewById(R.id.scrollJobs)
-        llJobsContainer = findViewById(R.id.llJobsContainer)
+            // Jobs Container
+            scrollJobs = findViewById(R.id.scrollJobs) ?: throw Exception("scrollJobs not found")
+            llJobsContainer = findViewById(R.id.llJobsContainer) ?: throw Exception("llJobsContainer not found")
+        } catch (e: Exception) {
+            Log.e("JobsScreen", "Error finding view: ${e.message}")
+            throw e
+        }
     }
 
     private fun setupClickListeners() {
@@ -83,56 +114,64 @@ class JobsActivity : AppCompatActivity() {
         otherTab.setTextColor(ContextCompat.getColor(this, R.color.gray_dark))
     }
 
-    // Data class for available jobs
-    data class AvailableJob(
-        val foodType: String,
-        val distance: String,
-        val quantity: String,
-        val timeAgo: String
-    )
     private fun loadAvailableJobs() {
-        llJobsContainer.removeAllViews()
+        coroutineScope.launch {
+            try {
+                val apiService = RetrofitClient.getAuthApiService(authToken)
+                val donorPostsResponse = withContext(Dispatchers.IO) {
+                    apiService.getAvailableDonorPosts().execute()
+                }
 
-        // Sample available jobs data using data class
-        val availableJobs = listOf(
-            AvailableJob("Mixed Food", "0.8 km", "2.5 kg", "5 min ago"),
-            AvailableJob("Vegetables", "1.2 km", "4.0 kg", "12 min ago"),
-            AvailableJob("Bakery", "2.5 km", "1.5 kg", "25 min ago"),
-            AvailableJob("Meat/Dairy", "3.1 km", "3.0 kg", "40 min ago")
-        )
+                if (donorPostsResponse.isSuccessful) {
+                    val jobs = donorPostsResponse.body()?.data.orEmpty().map { it.toAvailableJob() }
+                    if (jobs.isNotEmpty()) {
+                        withContext(Dispatchers.Main) {
+                            llJobsContainer.removeAllViews()
+                            jobs.forEach { job ->
+                                addRealJobCard(job)
+                            }
+                            Log.d("JobsScreen", "Loaded ${jobs.size} available jobs from API")
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            showNoJobsMessage()
+                        }
+                    }
+                } else {
+                    Log.e("JobsScreen", "Donor posts endpoint failed: ${donorPostsResponse.code()}")
 
-        for (job in availableJobs) {
-            addAvailableJobCard(job.foodType, job.distance, job.quantity, job.timeAgo)
-        }
+                    // Fallback during backend transition.
+                    val legacyResponse = withContext(Dispatchers.IO) {
+                        apiService.getAvailableJobs().execute()
+                    }
 
-        // If no jobs, show empty state
-        if (availableJobs.isEmpty()) {
-            showEmptyState(R.string.no_available_jobs)
+                    if (legacyResponse.isSuccessful) {
+                        val jobs = legacyResponse.body()
+                        withContext(Dispatchers.Main) {
+                            llJobsContainer.removeAllViews()
+                            if (jobs.isNullOrEmpty()) {
+                                showNoJobsMessage()
+                            } else {
+                                jobs.forEach { addRealJobCard(it) }
+                            }
+                        }
+                    } else {
+                        Log.e("JobsScreen", "Legacy endpoint failed: ${legacyResponse.code()}")
+                        withContext(Dispatchers.Main) {
+                            showJobsLoadError()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("JobsScreen", "Exception loading jobs: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    showJobsLoadError()
+                }
+            }
         }
     }
 
-
-    private fun loadCompletedJobs() {
-        llJobsContainer.removeAllViews()
-
-        // Sample completed jobs data
-        val completedJobs = listOf(
-            arrayOf("Mixed Food", "2.5 kg", "25 Feb 2026", "450"),
-            arrayOf("Vegetables", "4.0 kg", "24 Feb 2026", "640"),
-            arrayOf("Bakery", "1.5 kg", "23 Feb 2026", "240")
-        )
-
-        for (job in completedJobs) {
-            addCompletedJobCard(job[0], job[1], job[2], job[3])
-        }
-
-        // If no jobs, show empty state
-        if (completedJobs.isEmpty()) {
-            showEmptyState(R.string.no_completed_jobs)
-        }
-    }
-
-    private fun addAvailableJobCard(foodType: String, distance: String, quantity: String, timeAgo: String) {
+    private fun addRealJobCard(job: AvailableJob) {
         // Inflate the available job card layout
         val jobCard = layoutInflater.inflate(R.layout.item_job_available, llJobsContainer, false)
 
@@ -143,64 +182,74 @@ class JobsActivity : AppCompatActivity() {
         val tvTimePosted = jobCard.findViewById<TextView>(R.id.tvTimePosted)
         val btnViewJob = jobCard.findViewById<Button>(R.id.btnViewJob)
 
-        tvFoodType.text = foodType
-        tvDistance.text = distance
-        tvQuantity.text = "📦 $quantity"
-        tvTimePosted.text = "⏱️ Posted $timeAgo"
+        tvFoodType.text = job.foodType
+        val distanceLabel = job.distance?.let { "${it} km" } ?: "Distance N/A"
+        tvDistance.text = getString(
+            R.string.available_job_distance_quantity,
+            distanceLabel,
+            job.quantity.toString()
+        )
+        tvQuantity.text = getString(R.string.available_job_quantity, job.quantity.toString())
+        tvTimePosted.text = getString(R.string.posted_prefix, job.timeAgo)
 
         // View button click
         btnViewJob.setOnClickListener {
-            Toast.makeText(this, "Viewing $foodType job", Toast.LENGTH_SHORT).show()
-
-            // Navigate to Job Details
             val intent = Intent(this, JobDetailsActivity::class.java)
-            intent.putExtra("food_type", foodType)
-            intent.putExtra("quantity", quantity)
-            intent.putExtra("distance", distance)
-            intent.putExtra("time_ago", timeAgo)
-            intent.putExtra("donor_name", "Sarah")
-            intent.putExtra("donor_rating", "4.9")
-            intent.putExtra("address", "123 Main Street, Apt 4B")
+            intent.putExtra("job_id", job.id)
+            intent.putExtra("food_type", job.foodType)
+            intent.putExtra("quantity", "${job.quantity}")
+            intent.putExtra("distance", distanceLabel)
+            intent.putExtra("time_ago", job.timeAgo)
+            intent.putExtra("donor_name", job.donorName)
+            intent.putExtra("donor_rating", job.donorRating.toString())
+            intent.putExtra("address", job.address)
+            intent.putExtra("instructions", job.instructions ?: "")
             intent.putExtra("city", "Kampala, Uganda")
-            intent.putExtra("instructions", "Ring doorbell, back door")
             startActivity(intent)
         }
 
         llJobsContainer.addView(jobCard)
     }
 
-    private fun addCompletedJobCard(foodType: String, quantity: String, date: String, earnings: String) {
-        // Inflate the completed job card layout
-        val jobCard = layoutInflater.inflate(R.layout.item_job_completed, llJobsContainer, false)
-
-        // Set job data
-        val tvFoodType = jobCard.findViewById<TextView>(R.id.tvFoodType)
-        val tvQuantity = jobCard.findViewById<TextView>(R.id.tvQuantity)
-        val tvCompletedDate = jobCard.findViewById<TextView>(R.id.tvCompletedDate)
-        val tvEarnings = jobCard.findViewById<TextView>(R.id.tvEarnings)
-        val btnDetails = jobCard.findViewById<Button>(R.id.btnDetails)
-
-        tvFoodType.text = foodType
-        tvQuantity.text = "📦 $quantity"
-        tvCompletedDate.text = "📅 ${getString(R.string.job_completed_on)} $date"
-        tvEarnings.text = String.format(getString(R.string.earned_amount), earnings)
-
-        // Details button click
-        btnDetails.setOnClickListener {
-            Toast.makeText(this, "Viewing details for $foodType", Toast.LENGTH_SHORT).show()
-            // Navigate to job summary/receipt (future)
-        }
-
-        llJobsContainer.addView(jobCard)
+    private fun showNoJobsMessage() {
+        llJobsContainer.removeAllViews()
+        val tvNoJobs = TextView(this)
+        tvNoJobs.text = getString(R.string.jobs_no_nearby)
+        tvNoJobs.textSize = 14f
+        tvNoJobs.setTextColor(ContextCompat.getColor(this, R.color.gray_dark))
+        tvNoJobs.gravity = android.view.Gravity.CENTER
+        tvNoJobs.setPadding(32, 64, 32, 64)
+        llJobsContainer.addView(tvNoJobs)
     }
 
-    private fun showEmptyState(messageResId: Int) {
-        val tvEmpty = TextView(this)
-        tvEmpty.text = getString(messageResId)
-        tvEmpty.textSize = 16f
-        tvEmpty.setTextColor(ContextCompat.getColor(this, R.color.gray_dark))
-        tvEmpty.gravity = android.view.Gravity.CENTER
-        tvEmpty.setPadding(32, 64, 32, 64)
-        llJobsContainer.addView(tvEmpty)
+    private fun showJobsLoadError() {
+        llJobsContainer.removeAllViews()
+        val tvError = TextView(this)
+        tvError.text = getString(R.string.jobs_loading_error)
+        tvError.textSize = 14f
+        tvError.setTextColor(ContextCompat.getColor(this, R.color.gray_dark))
+        tvError.gravity = android.view.Gravity.CENTER
+        tvError.setPadding(32, 64, 32, 64)
+        llJobsContainer.addView(tvError)
+    }
+
+    private fun loadCompletedJobs() {
+        llJobsContainer.removeAllViews()
+        showNoCompletedJobsMessage()
+    }
+
+    private fun showNoCompletedJobsMessage() {
+        val tvNoCompleted = TextView(this)
+        tvNoCompleted.text = getString(R.string.no_completed_jobs)
+        tvNoCompleted.textSize = 14f
+        tvNoCompleted.setTextColor(ContextCompat.getColor(this, R.color.gray_dark))
+        tvNoCompleted.gravity = android.view.Gravity.CENTER
+        tvNoCompleted.setPadding(32, 64, 32, 64)
+        llJobsContainer.addView(tvNoCompleted)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        coroutineScope.cancel()
     }
 }

@@ -1,6 +1,6 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">WasteConnect</string>
-    <string name="slogan">"Don't Bin It – Turn Waste to Value"</string>
+<resources>
+    <string name="app_name"> VALUE </string>
+    <string name="slogan">Turning Food Waste into Value</string>
     <string name="i_have_waste">I HAVE WASTE</string>
     <string name="donate_description">Donate for collection</string>
     <string name="become_collector">BECOME A COLLECTOR</string>
@@ -11,7 +11,7 @@
     <string name="bike">🚴</string>
 
     <!-- Screen 3A - Collector Registration -->
-    <string name="collector_registration">🚴 COLLECTOR REGISTRATION</string>
+    <string name="collector_registration">COLLECTOR REGISTRATION</string>
     <string name="full_name">Full Name</string>
     <string name="full_name_hint">John Doe</string>
     <string name="phone_number">Phone Number</string>
@@ -66,11 +66,19 @@
     <string name="phone_label">Phone:</string>
     <string name="status_label">Status:</string>
     <string name="pending_review">Pending Review</string>
-    <string name="direct_call_message">You will receive a direct call on your phone</string>
+    <string name="waiting_for_approval_message">You will receive a direct call on your phone</string>
     <string name="back_to_home">BACK TO HOME</string>
 
     <string name="approval_name">John Doe</string>
     <string name="approval_phone">+256 754160893</string>
+
+    <!-- Screen 3B - Collector Registration Passwords -->
+    <string name="create_password">Create Password</string>
+    <string name="create_password_hint">Enter a password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="confirm_password_hint">Re-enter your password</string>
+    <string name="password_mismatch">Passwords do not match</string>
+    <string name="password_too_short">Password must be at least 6 characters</string>
 
     <!-- Screen 3C - Collector Login -->
     <string name="collector_login">Collector Login</string>
@@ -111,6 +119,13 @@
     <string name="jobs_tab_coming">Jobs - Coming Soon</string>
     <string name="earnings_tab_coming">Earnings - Coming Soon</string>
     <string name="profile_tab_coming">Profile - Coming Soon</string>
+    <string name="dashboard_earnings_today">UGX %1$s</string>
+    <string name="dashboard_value_unavailable">-</string>
+    <string name="available_job_distance_quantity">%1$s • %2$s kg</string>
+    <string name="available_job_quantity">📦 %1$s kg</string>
+    <string name="posted_prefix">Posted %1$s</string>
+    <string name="jobs_loading_error">Unable to load jobs right now. Please try again.</string>
+    <string name="jobs_no_nearby">No jobs available nearby</string>
     <!-- Login messages -->
     <string name="account_pending">Your account is still pending approval. You will receive a call when approved.</string>
 
@@ -247,7 +262,7 @@
     <string name="mixed_other_desc">Specify in notes</string>
     <string name="selected_items">Selected: %d item</string>
     <string name="selected_items_plural">Selected: %d items</string>
-    <string name="continue_button">CONTINUE →</string>
+    <string name="continue_button">CONTINUE</string>
     <string name="step_1_of_4">Step 1 of 4</string>
     <string name="waste_type_selection_list">Waste type selection list</string>
     <string name="selected_0_items">Selected: 0 items</string>
@@ -302,16 +317,19 @@
     <string name="waste_posted">WASTE POSTED!</string>
     <string name="searching">SEARCHING</string>
     <string name="searching_message">Looking for nearest collector…</string>
+    <string name="no_collectors_nearby">No collectors available nearby right now. Tap Retry to search again.</string>
     <string name="collector_found">COLLECTOR FOUND!</string>
     <string name="found">FOUND</string>
     <string name="collector_will_collect">%s will collect your food waste</string>
     <string name="arriving_in">Arriving in %d minutes</string>
     <string name="cancel_post">CANCEL POST</string>
     <string name="ok_got_it">OK, GOT IT</string>
+    <string name="retry_search">RETRY SEARCH</string>
     <string name="cancel_confirm">Are you sure you want to cancel this post?</string>
     <string name="post_cancelled">Post cancelled</string>
     <string name="call">Call</string>
     <string name="chat">Chat</string>
     <string name="keep_your_phone_nearby">💡 Keep your phone nearby</string>
     <string name="search">🔍</string>
+    <string name="test_api_connection">Test API Connection</string>
 </resources>
